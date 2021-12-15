@@ -1,12 +1,7 @@
 # load libraries
 library(tidyverse)
+library(readr)
 
-# download case data from NY Times website
-url = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
-case_data_raw = read_csv(url)
+# download raw data into a tibble
+grad_data_raw <- read_csv("grad-rate-project/data/raw/grad_data_raw.csv")
 
-# write raw data to file
-write_tsv(x = case_data_raw, file = "data/raw/case_data_raw.tsv")
-
-# download health rankings data from the web 
-# (omitted from this template)

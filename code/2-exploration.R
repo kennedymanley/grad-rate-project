@@ -6,21 +6,26 @@ library(maps)                           # for creating maps
 library(tidyverse)
 
 # read in the cleaned data
-covid_data = read_tsv("data/clean/covid_data.tsv")
+grad_data = read_csv("data/clean/grad_data.csv")
 
-# calculate median case fatality rate
-median_case_fatality_rate = covid_data %>%
-  summarise(median(case_fatality_rate)) %>%
+
+
+# calculate median graduation rate
+median_grad_rate = grad_data %>%
+  summarise(median(as.numeric(grad_rate))) %>%
   pull()
 
-# create histogram of case fatality rate
-p = covid_data %>%
-  ggplot(aes(x = case_fatality_rate)) + 
-  geom_histogram() +
-  geom_vline(xintercept = median_case_fatality_rate,
-             linetype = "dashed") +
-  labs(x = "Case fatality rate (percent)", 
-       y = "Number of counties") +
+
+
+# create histogram of graduation rate
+p = grad_data %>%
+  ggplot(aes(x = grad_rate)) + 
+  geom_histogram(bins = 15) +
+  geom_vline(xintercept = median_grad_rate,
+             linetype = "dashed",
+             color = "red") +
+  labs(x = "Graduation Rate (percent)",
+       y = "Frequency") +
   theme_bw()
 
 # save the histogram
@@ -30,34 +35,34 @@ ggsave(filename = "results/response-histogram.png",
        width = 5, 
        height = 3)
 
-# examine top 10 counties by case fatality rate
-covid_data %>% 
-  select(county, state, case_fatality_rate) %>%
-  arrange(desc(case_fatality_rate)) %>%
-  head(10) %>%
-  write_tsv("results/top-10-counties-data.tsv")
+# examine counties with schools that have 100% graduation rate
+grad_data %>% 
+  select(county_code, county_name, grad_rate) %>%
+  distinct() %>%
+  arrange(desc(grad_rate)) %>%
+  head(62) %>%
+  write_csv("results/top-counties-data.csv")
 
-# create a heatmap of case fatality rate across the U.S.
-p = map_data("county") %>%
-  as_tibble() %>% 
-  left_join(case_data %>% 
-              rename(region = state, 
-                     subregion = county,
-                     `Case Fatality Rate` = case_fatality_rate) %>% 
-              mutate(region = str_to_lower(region), 
-                     subregion = str_to_lower(subregion)), 
-            by = c("region", "subregion")) %>%
-  ggplot() + 
-  geom_polygon(data=map_data("state"), 
-               aes(x=long, y=lat, group=group),
-               color="black", fill=NA,  size = 1, alpha = .3) + 
-  geom_polygon(aes(x=long, y=lat, group=group, fill = `Case Fatality Rate`),
-               color="darkblue", size = .1) +
-  scale_fill_gradient(low = "blue", high = "red") +
-  theme_void()
+# calculate median dropout rate
+median_dropout_rate = grad_data %>%
+  summarise(median(as.numeric(dropout_rate))) %>%
+  pull()
 
-ggsave(filename = "results/response-map.png", 
-       plot = p, 
+
+# create histogram of dropout rate
+z = grad_data %>%
+  ggplot(aes(x = dropout_rate)) + 
+  geom_histogram(bins = 15) +
+  geom_vline(xintercept = median_dropout_rate,
+             linetype = "dashed",
+             color = "red") +
+  labs(x = "Dropout Rate (percent)",
+       y= "Frequency") +
+  theme_bw()
+
+# save the histogram
+ggsave(filename = "results/dropout-rate-histogram.png", 
+       plot = z, 
        device = "png", 
-       width = 7, 
-       height = 4)
+       width = 5, 
+       height = 3)

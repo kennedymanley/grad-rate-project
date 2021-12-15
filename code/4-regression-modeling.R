@@ -3,24 +3,26 @@ library(glmnetUtils)                    # to run ridge and lasso
 source("code/functions/plot_glmnet.R")            # for lasso/ridge trace plots
 
 # read in the training data
-covid_train = read_tsv("data/clean/covid_train.tsv")
+grad_train = read_csv("data/clean/grad_train.csv")
 
 # run ridge regression
 set.seed(1)
-ridge_fit = cv.glmnet(case_fatality_rate ~ . - state - county - fips,   
+ridge_fit = cv.glmnet(grad_rate ~ . - report_school_year - aggregation_index - aggregation_name
+                      - county_code - county_name - membership_desc - subgroup_name,   
                       alpha = 0,                 
                       nfolds = 10,               
-                      data = covid_train)
+                      data = grad_train)
 
 # save the ridge fit object
 save(ridge_fit, file = "results/ridge_fit.Rda")
 
 # run lasso regression
 set.seed(1)
-lasso_fit = cv.glmnet(case_fatality_rate ~ . - state - county - fips,   
+lasso_fit = cv.glmnet(grad_rate ~ . - report_school_year - aggregation_index - aggregation_name
+                      - county_code - county_name - membership_desc - subgroup_name,   
                       alpha = 1,                 
                       nfolds = 10,               
-                      data = covid_train)
+                      data = grad_train)
 
 # save the lasso fit object
 save(lasso_fit, file = "results/lasso_fit.Rda")
@@ -35,7 +37,7 @@ plot(lasso_fit)
 dev.off()
 
 # create lasso trace plot
-p = plot_glmnet(lasso_fit, covid_train, features_to_plot = 6)
+p = plot_glmnet(lasso_fit, grad_train, features_to_plot = 6)
 ggsave(filename = "results/lasso-trace-plot.png", 
        plot = p, 
        device = "png", 
@@ -43,8 +45,8 @@ ggsave(filename = "results/lasso-trace-plot.png",
        height = 4)
 
 # extract features selected by lasso and their coefficients
-beta_hat_std = extract_std_coefs(lasso_fit, covid_train)
+beta_hat_std = extract_std_coefs(lasso_fit, grad_train)
 beta_hat_std %>%
   filter(coefficient != 0) %>%
   arrange(desc(abs(coefficient))) %>% 
-  write_tsv("results/lasso-features-table.tsv")
+  write_csv("results/lasso-features-table.csv")
