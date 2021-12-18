@@ -38,6 +38,8 @@ deepest_tree_fit = rpart(grad_rate ~ .,
                                                  cp = 0),
                          data = sliced_data)
 
+save(deepest_tree_fit, file = "results/deepest_tree_fit.Rda")
+
 # print the CP table for this tree
 cp_table = deepest_tree_fit$cptable %>% as_tibble()
 save(cp_table, file = "results/cp_table.Rda")

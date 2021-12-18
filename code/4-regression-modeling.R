@@ -12,6 +12,9 @@ lm_fit = lm(grad_rate ~ aggregation_index + nrc_code + county_code +membership_c
               data =grad_train)
 summary(lm_fit)
 
+# save the linear fit object
+save(lm_fit, file = "results/lm_fit.Rda")
+
 # run ridge regression
 set.seed(1)
 ridge_fit = cv.glmnet(grad_rate ~ . - report_school_year - aggregation_index - aggregation_name
@@ -91,6 +94,8 @@ save(elnet_fit, file = "results/elnet_fit.Rda")
 
 elnet_fit_best = extract_best_elnet(elnet_fit)
 elnet_fit_best$alpha
+# save the elastic net best fit model object
+save(elnet_fit, file = "results/elnet_fit_best.Rda")
 
 # create elastic net CV plot
 png(width = 6, 
@@ -101,7 +106,7 @@ png(width = 6,
 plot(elnet_fit_best)
 dev.off()
 
-# create lasso trace plot
+# create elnet trace plot
 d = plot_glmnet(elnet_fit_best, grad_train, features_to_plot = 6)
 ggsave(filename = "results/elnet-trace-plot.png", 
        plot = p, 
