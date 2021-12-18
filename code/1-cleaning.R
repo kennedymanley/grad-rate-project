@@ -8,7 +8,7 @@ grad_data_raw = read_csv(file = "data/raw/grad_data_raw.csv",
 
 # clean case data
 grad_data = grad_data_raw %>%   
-  select(-lea_name, -entity_inactive_date, -nrc_desc, -boces_name, -aggregation_type, -aggregation_code, -lea_beds, -nrc_code, -boces_code, -nyc_ind) %>%
+  select(-lea_name, -entity_inactive_date, -nrc_desc, -boces_name, -aggregation_type, -aggregation_code, -lea_beds, -boces_code, -nyc_ind) %>%
   mutate(grad_rate = grad_cnt/enroll_cnt*100) %>%
   mutate(local_rate = local_cnt/enroll_cnt*100) %>%
   mutate(reg_rate = reg_cnt/enroll_cnt*100) %>%

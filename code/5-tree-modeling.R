@@ -29,7 +29,7 @@ save(tree_fit1, file = "results/tree_fit.Rda")
 rpart.plot(tree_fit1, box.palette=0) # plot tree
 
 #fit deepest possible tree
-set.seed(1) # for reproducibility (DO NOT CHANGE)
+set.seed(1) # for reproducibility
 deepest_tree_fit = rpart(grad_rate ~ .,
                          method = "class",
                          parms = list(split = "gini"),
@@ -43,7 +43,7 @@ cp_table = deepest_tree_fit$cptable %>% as_tibble()
 save(cp_table, file = "results/cp_table.Rda")
 
 # produce CV plot based on info in CP table
-cp_table %>%
+t = cp_table %>%
   filter(nsplit >= 2) %>%
   ggplot(aes(x = nsplit+1, y = xerror,
              ymin = xerror - xstd, ymax = xerror + xstd)) + 
@@ -53,6 +53,12 @@ cp_table %>%
   xlab("Number of terminal nodes on log scale") + ylab("CV error") + 
   geom_hline(aes(yintercept = min(xerror)), linetype = "dashed") + 
   theme_bw()
+
+ggsave(filename = "results/deep-tree-cv.png", 
+       plot = t, 
+       device = "png", 
+       width = 6, 
+       height = 4)
 
 optimal_tree_info = cp_table %>% 
   filter(xerror - xstd < min(xerror)) %>% 
@@ -76,8 +82,17 @@ mtry_verified = rf_fit$mtry
 o = tibble(oob_error = rf_fit$err.rate[,"OOB"], trees = 1:500) %>%
   ggplot(aes(x = trees, y = oob_error)) + geom_line() + 
   labs(x = "Number of trees", y = "OOB error") + theme_bw()
+
 ggsave(filename = "results/oob-error-plot.png", 
        plot = o, 
        device = "png", 
        width = 6, 
        height = 4)
+
+
+set.seed(1) # for reproducibility (DO NOT CHANGE)
+
+rf_fit_tuned = randomForest(factor(grad_rate) ~ ., mtry = 4, ntree = 500,
+                            importance = TRUE, data = sliced_data)
+varImpPlot(rf_fit_tuned, n.var = 10)
+
