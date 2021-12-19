@@ -13,7 +13,7 @@ grad_train = read_csv("data/clean/grad_train.csv")
 
 
 # calculate median graduation rate
-median_grad_rate = grad_data %>%
+median_grad_rate = grad_train %>%
   summarise(median(as.numeric(grad_rate))) %>%
   pull()
 
@@ -93,8 +93,11 @@ ggsave(filename = "results/nrc-grad-rate.png",
 #graduation rate based on county
 county_grad_rate = grad_train %>% group_by(county_code) %>% summarize(avg_grad_rate = mean(grad_rate))
 
+el_text <- element_text(size = 5, angle = 90)
+
 h = county_grad_rate %>% ggplot() +
   geom_boxplot(aes(x = as.factor(county_code), y = avg_grad_rate)) +
+  theme(axis.text.x = el_text)+
   ylab("Average Graduation Rate")+
   xlab("County Code")
 
